@@ -2,8 +2,8 @@
 
 ## How it runs
 
-The root `app.py` is the entry point. Run locally with `python app.py`.
-Render runs Flask using Gunicorn (`app:app`). Vercel serves static assets and
+The existing `backend/app.py` is the entry point. Run locally with `python backend/app.py`.
+Render runs Flask using Gunicorn (`backend.app:create_app()`). Vercel serves static assets and
 proxies pages/forms to Render, where Flask renders the existing Jinja templates.
 Use the Vercel URL consistently so forms and session cookies share one domain.
 
@@ -22,7 +22,7 @@ For a manual **New > Web Service** deployment, use:
 | Root directory | Repository root (leave blank) |
 | Instance type | Free |
 | Build command | `pip install -r requirements.txt` |
-| Start command | `gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --access-logfile - --error-logfile - app:app` |
+| Start command | `gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --access-logfile - --error-logfile - 'backend.app:create_app()'` |
 | Health check | `/healthz` |
 | `APP_ENV` | `production` |
 | `SECRET_KEY` | A random secret with at least 32 characters |

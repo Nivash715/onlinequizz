@@ -10,7 +10,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete setup. Render runs Flask
 on the free plan with temporary SQLite storage; Vercel serves static assets and proxies the
 server-rendered pages and forms. Deployment configuration is included in
 `render.yaml` and `frontend/vercel.json`. Free Render loses hosted questions
-and results on restart, redeploy, or idle spin-down. Run locally with `python app.py`.
+and results on restart, redeploy, or idle spin-down. Run locally with `python backend/app.py`.
 
 ## Features
 
@@ -34,7 +34,7 @@ and results on restart, redeploy, or idle spin-down. Run locally with `python ap
 
 ## Installation and running
 
-Open a terminal in `online_quiz_system`, the folder containing `app.py`.
+Open a terminal in `online_quiz_system`, the folder containing `backend/`.
 
 ```powershell
 cd "E:\Dvein Python\Example Projects\template5\online_quiz_system"
@@ -63,7 +63,7 @@ Install and run:
 
 ```bash
 python -m pip install -r requirements.txt
-python app.py
+python backend/app.py
 ```
 
 Open **http://127.0.0.1:5000**. Stop the server with **Ctrl+C**.
@@ -71,7 +71,7 @@ If PowerShell blocks activation, you can use the virtual environment directly:
 
 ```powershell
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
-.\venv\Scripts\python.exe app.py
+.\venv\Scripts\python.exe backend/app.py
 ```
 
 The application creates `database/quiz.db` and its tables automatically. No
@@ -136,7 +136,7 @@ online_quiz_system/
 
 All complete pages extend `base.html`. `_form.html` is an included partial,
 shared by the create and edit pages. Python lives in the backend; templates and
-CSS live in the frontend. `app.py` is the entry point.
+CSS live in the frontend. `backend/app.py` is the entry point.
 
 ## How the frontend communicates with the backend
 
@@ -247,7 +247,7 @@ Then assign the generated value in your terminal (PowerShell):
 
 ```powershell
 $env:SECRET_KEY = 'your-generated-value'
-python app.py
+python backend/app.py
 ```
 
 Without that environment variable, the app generates a random key on startup;

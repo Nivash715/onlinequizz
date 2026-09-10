@@ -1,4 +1,12 @@
+import os
 import secrets
+import sys
+from pathlib import Path
+
+# Allow direct execution with `python backend/app.py` as well as module imports.
+if __package__ in (None, ''):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from flask import Flask, abort, render_template, request, session
 from backend.config import Config, ROOT, environment_config
 from backend.database.db import close_db, get_db, init_db
@@ -59,3 +67,9 @@ def create_app(test_config=None):
     with app.app_context():
         init_db()
     return app
+
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(host=os.environ.get('HOST', '127.0.0.1'),
+            port=int(os.environ.get('PORT', '5000')), debug=False)

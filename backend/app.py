@@ -8,14 +8,14 @@ if __package__ in (None, ''):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from flask import Flask, abort, render_template, request, session
-from backend.config import Config, ROOT, environment_config
+from backend.config import Config, environment_config
 from backend.database.db import close_db, get_db, init_db
 from backend.routes import question_routes, quiz_routes
 
 
 def create_app(test_config=None):
-    app = Flask(__name__, template_folder=str(ROOT / 'frontend' / 'templates'),
-                static_folder=str(ROOT / 'frontend' / 'static'))
+    app = Flask(__name__, template_folder=str(Path(__file__).resolve().parent / 'templates'),
+                static_folder=str(Path(__file__).resolve().parent / 'static'))
     app.config.from_object(Config)
     app.config.update(environment_config())
     if test_config:
@@ -71,5 +71,6 @@ def create_app(test_config=None):
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host=os.environ.get('HOST', '127.0.0.1'),
+    default_host = '0.0.0.0' if os.environ.get('RENDER') or os.environ.get('PORT') else '127.0.0.1'
+    app.run(host=os.environ.get('HOST', default_host),
             port=int(os.environ.get('PORT', '5000')), debug=False)

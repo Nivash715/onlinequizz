@@ -62,7 +62,7 @@ source venv/bin/activate
 Install and run:
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install -r backend/requirements.txt
 python backend/app.py
 ```
 
@@ -70,7 +70,7 @@ Open **http://127.0.0.1:5000**. Stop the server with **Ctrl+C**.
 If PowerShell blocks activation, you can use the virtual environment directly:
 
 ```powershell
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
+.\venv\Scripts\python.exe -m pip install -r backend/requirements.txt
 .\venv\Scripts\python.exe backend/app.py
 ```
 
@@ -87,56 +87,30 @@ offline. All quiz functionality, styling, and data storage work locally.
 
 ```text
 online_quiz_system/
-├── backend/
-│   ├── __init__.py
-│   ├── app.py                  # App factory, configuration, CSRF, error pages
-│   ├── config.py               # Paths and environment-based secret key
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── question_model.py   # Parameterized question CRUD queries
-│   │   └── result_model.py     # Result and attempt persistence
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   ├── question_routes.py  # Question HTTP handlers and form validation
-│   │   └── quiz_routes.py      # Dashboard and quiz HTTP handlers
-│   ├── database/
-│   │   ├── __init__.py
-│   │   └── db.py               # Connection lifecycle and automatic schema
-│   └── services/
-│       ├── __init__.py
-│       └── quiz_service.py     # Quiz creation, answer validation, scoring
-├── frontend/
-│   ├── templates/
-│   │   ├── base.html           # Shared navigation, messages, footer
-│   │   ├── index.html
-│   │   ├── error.html
-│   │   ├── questions/
-│   │   │   ├── _form.html      # Shared create/edit form partial
-│   │   │   ├── list.html
-│   │   │   ├── create.html
-│   │   │   ├── edit.html
-│   │   │   ├── view.html
-│   │   │   └── delete.html     # Confirmation page
-│   │   └── quiz/
-│   │       ├── start.html
-│   │       ├── quiz.html
-│   │       └── result.html
-│   └── static/
-│       └── css/
-│           └── style.css      # All styling and responsive breakpoints
-├── database/
-│   └── quiz.db                # Automatically initialized SQLite database
-├── tests/
-│   └── test_app.py            # Integration tests with temporary databases
-├── .gitignore
-├── requirements.txt
-├── README.md
-└── app.py
+  backend/                 # Render Root Directory
+    app.py                 # App factory and local entry point
+    config.py
+    requirements.txt
+    database/
+    models/
+    routes/
+    services/
+    templates/             # Jinja pages, rendered by Flask
+    static/css/style.css   # Render/local stylesheet
+  frontend/                # Vercel Root Directory
+    static/css/style.css   # Vercel stylesheet; keep in sync with backend copy
+    build.mjs
+    vercel.json
+  database/                # Local SQLite data
+  tests/
+  render.yaml
+  DEPLOYMENT.md
+  README.md
 ```
 
 All complete pages extend `base.html`. `_form.html` is an included partial,
-shared by the create and edit pages. Python lives in the backend; templates and
-CSS live in the frontend. `backend/app.py` is the entry point.
+shared by the create and edit pages. Python and Jinja templates live in the backend; CSS is included in both
+backend and frontend deployments. `backend/app.py` is the entry point.
 
 ## How the frontend communicates with the backend
 
@@ -257,7 +231,8 @@ and results remain intact. No `.env` loader is required.
 This deliberately has no authentication: question management, correct-answer
 details, and saved results are available to anyone using this local app. It is
 suited to a trusted local learning/demo environment, not private exam delivery.
-The entry point binds to `127.0.0.1` with debug mode disabled.
+The entry point uses `127.0.0.1` locally and `0.0.0.0` when `RENDER` or
+`PORT` is set, with debug mode disabled. Render uses Gunicorn.
 
 ## Tests
 

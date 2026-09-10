@@ -3,7 +3,7 @@
 ## How it runs
 
 The existing `backend/app.py` is the entry point. Run locally with `python backend/app.py`.
-Render runs Flask using Gunicorn (`backend.app:create_app()`). Vercel serves static assets and
+Render runs Flask using Gunicorn (`app:create_app()`). Vercel serves static assets and
 proxies pages/forms to Render, where Flask renders the existing Jinja templates.
 Use the Vercel URL consistently so forms and session cookies share one domain.
 
@@ -11,18 +11,18 @@ Use the Vercel URL consistently so forms and session cookies share one domain.
 
 Push the entire project to Git, then choose **New > Blueprint** in Render and
 connect the repository. `render.yaml` selects `plan: free` with no paid disk
-or database. Keep the repository root directory; Render needs both `backend/`
-and `frontend/templates/`.
+or database. Set Root Directory to `backend`. This folder includes the Python
+code, Jinja templates, and static assets required to run independently.
 
 For a manual **New > Web Service** deployment, use:
 
 | Setting | Value |
 | --- | --- |
 | Runtime | Python 3 |
-| Root directory | Repository root (leave blank) |
+| Root directory | `backend` |
 | Instance type | Free |
 | Build command | `pip install -r requirements.txt` |
-| Start command | `gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --access-logfile - --error-logfile - 'backend.app:create_app()'` |
+| Start command | `gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --access-logfile - --error-logfile - 'app:create_app()'` |
 | Health check | `/healthz` |
 | `APP_ENV` | `production` |
 | `SECRET_KEY` | A random secret with at least 32 characters |
@@ -69,6 +69,19 @@ This configuration has no paid resources. Free hosting remains subject to
 platform usage limits. Durable hosted data would require adapting this SQLite
 application to an external database; it is not provided by this configuration.
 
+## Fix an existing deployment stuck scanning ports
+
+In Render Settings, keep **Root Directory** set to `backend`, set
+Build Command to `pip install -r requirements.txt`, and set Start
+Command to `gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 'app:create_app()'`.
+Save the settings, push the latest code, and deploy the latest commit. A manually
+created service does not automatically use commands from `render.yaml`.
+
+The old `python app.py` command launched Flask on `127.0.0.1`, which Render
+cannot expose. The direct Python entry point now defaults to `0.0.0.0` when
+`RENDER` or `PORT` is set; Gunicorn remains the configured hosting command.
+Remove an explicit `HOST=127.0.0.1` environment override if using direct Python.
+
 ## Checks and troubleshooting
 
 ```powershell
@@ -99,3 +112,7 @@ References: [Render free hosting](https://render.com/docs/free),
 [Render Flask](https://render.com/docs/deploy-flask),
 [Vercel Hobby](https://vercel.com/docs/plans/hobby), and
 [Vercel Build Output API](https://vercel.com/docs/build-output-api/configuration).
+
+Templates live in `backend/templates`. When editing CSS, update both
+`frontend/static/css/style.css` (Vercel) and `backend/static/css/style.css`
+(Render/local fallback) so the two deployments stay consistent.

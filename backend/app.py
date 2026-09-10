@@ -1,7 +1,7 @@
 import secrets
 from flask import Flask, abort, render_template, request, session
-from backend.config import Config, ROOT
-from backend.database.db import close_db, init_db
+from backend.config import Config, ROOT, environment_config
+from backend.database.db import close_db, get_db, init_db
 from backend.routes import question_routes, quiz_routes
 
 
@@ -9,14 +9,29 @@ def create_app(test_config=None):
     app = Flask(__name__, template_folder=str(ROOT / 'frontend' / 'templates'),
                 static_folder=str(ROOT / 'frontend' / 'static'))
     app.config.from_object(Config)
+    app.config.update(environment_config())
     if test_config:
         app.config.update(test_config)
     app.teardown_appcontext(close_db)
     app.register_blueprint(question_routes.bp)
     app.register_blueprint(quiz_routes.bp)
 
+    @app.get('/healthz')
+    def health():
+        get_db().execute('SELECT 1').fetchone()
+        return {'status': 'ok'}
+
+    @app.after_request
+    def prevent_page_caching(response):
+        # HTML contains participant data and per-session CSRF tokens.
+        if request.endpoint != 'static':
+            response.headers['Cache-Control'] = 'private, no-store'
+        return response
+
     @app.before_request
     def protect_forms():
+        if request.endpoint in ('health', 'static'):
+            return
         if 'csrf_token' not in session:
             session['csrf_token'] = secrets.token_hex(32)
         if request.method == 'POST':

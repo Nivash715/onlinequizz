@@ -4,6 +4,14 @@ A beginner-friendly local quiz application built with Python, Flask, Jinja2,
 HTML, CSS, and Python's built-in SQLite support. The interface is branded
 **Quizcraft**. No frontend framework, ORM, or JavaScript is required.
 
+## Hosting on Vercel and Render
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete setup. Render runs Flask
+on the free plan with temporary SQLite storage; Vercel serves static assets and proxies the
+server-rendered pages and forms. Deployment configuration is included in
+`render.yaml` and `frontend/vercel.json`. Free Render loses hosted questions
+and results on restart, redeploy, or idle spin-down. Run locally with `python app.py`.
+
 ## Features
 
 - Create, list, view, edit, and delete multiple-choice questions.
@@ -22,11 +30,11 @@ HTML, CSS, and Python's built-in SQLite support. The interface is branded
 
 - Python 3.10 or newer (verified with Python 3.12).
 - pip and a web browser.
-- Flask (the only direct dependency).
+- Flask; Gunicorn is installed on non-Windows systems for production hosting.
 
 ## Installation and running
 
-Open a terminal in `online_quiz_system`, the folder containing `run.py`.
+Open a terminal in `online_quiz_system`, the folder containing `app.py`.
 
 ```powershell
 cd "E:\Dvein Python\Example Projects\template5\online_quiz_system"
@@ -55,7 +63,7 @@ Install and run:
 
 ```bash
 python -m pip install -r requirements.txt
-python run.py
+python app.py
 ```
 
 Open **http://127.0.0.1:5000**. Stop the server with **Ctrl+C**.
@@ -63,7 +71,7 @@ If PowerShell blocks activation, you can use the virtual environment directly:
 
 ```powershell
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
-.\venv\Scripts\python.exe run.py
+.\venv\Scripts\python.exe app.py
 ```
 
 The application creates `database/quiz.db` and its tables automatically. No
@@ -123,12 +131,12 @@ online_quiz_system/
 ├── .gitignore
 ├── requirements.txt
 ├── README.md
-└── run.py
+└── app.py
 ```
 
 All complete pages extend `base.html`. `_form.html` is an included partial,
 shared by the create and edit pages. Python lives in the backend; templates and
-CSS live in the frontend. `run.py` is the entry point.
+CSS live in the frontend. `app.py` is the entry point.
 
 ## How the frontend communicates with the backend
 
@@ -239,7 +247,7 @@ Then assign the generated value in your terminal (PowerShell):
 
 ```powershell
 $env:SECRET_KEY = 'your-generated-value'
-python run.py
+python app.py
 ```
 
 Without that environment variable, the app generates a random key on startup;
@@ -259,7 +267,7 @@ Run from `online_quiz_system`:
 python -m unittest discover -s tests -v
 ```
 
-The seven integration tests create isolated temporary SQLite databases and
+The integration tests create isolated temporary SQLite databases and
 exercise home, create, list, view, edit, delete confirmation, deletion, quiz
 start, answers, scoring, saved results, repeated submission, validation, CSRF,
 HTML escaping, invalid IDs, empty quizzes, search, persistence, stale forms,
@@ -279,5 +287,3 @@ the templates and forms were exercised through Flask's HTTP test client.
 - **Unable to open database:** make sure your user can write to the project's
   `database` folder and that the database is not read-only.
 - **No questions available:** add at least one question in the question bank.
-#   o n l i n e q u i z z  
- 

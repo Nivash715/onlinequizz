@@ -1,5 +1,7 @@
 """End-to-end HTTP tests using an isolated temporary SQLite database."""
 import tempfile
+import os
+from unittest.mock import patch
 import unittest
 from pathlib import Path
 from backend.app import create_app
@@ -36,6 +38,41 @@ class QuizSystemTests(unittest.TestCase):
         with self.client.session_transaction() as session:
             return {'attempt_token': session['attempt_token']}
 
+    def test_health_and_cache_policy(self):
+        client = self.app.test_client()
+        response = client.get('/healthz')
+        self.assertEqual(response.json, {'status': 'ok'})
+        self.assertNotIn('Set-Cookie', response.headers)
+        for path in ['/', '/questions', '/missing-page']:
+            self.assertEqual(client.get(path).headers['Cache-Control'], 'private, no-store')
+        with self.app.test_client().get('/static/css/style.css') as response:
+            self.assertNotIn('Set-Cookie', response.headers)
+
+    def test_production_configuration_and_session_restart(self):
+        with patch.dict(os.environ, {'APP_ENV': 'production', 'SECRET_KEY': '',
+                                     'DATABASE_PATH': self.app.config['DATABASE']}):
+            with self.assertRaisesRegex(RuntimeError, 'SECRET_KEY'):
+                create_app()
+        with patch.dict(os.environ, {'APP_ENV': 'production', 'SECRET_KEY': 'a' * 64,
+                                     'DATABASE_PATH': ''}):
+            with self.assertRaisesRegex(RuntimeError, 'DATABASE_PATH'):
+                create_app()
+        with patch.dict(os.environ, {'APP_ENV': 'production', 'SECRET_KEY': 'a' * 64,
+                                     'DATABASE_PATH': self.app.config['DATABASE']}):
+            first = create_app().test_client()
+            response = first.get('/', base_url='https://quiz.example')
+            self.assertIn('Secure;', response.headers['Set-Cookie'])
+            cookie = first.get_cookie('session', domain='quiz.example')
+            second = create_app().test_client()
+            second.set_cookie('session', cookie.value, domain='quiz.example')
+            with first.session_transaction(base_url='https://quiz.example') as session:
+                token = session['csrf_token']
+            response = second.post('/questions/create',
+                                   data={**self.question, 'csrf_token': token},
+                                   base_url='https://quiz.example')
+            self.assertEqual(response.status_code, 302)
+            self.assertTrue(response.location.startswith('/questions/'))
+
     def test_full_crud_and_quiz_flow(self):
         self.assertEqual(self.client.get('/').status_code, 200)
         question_id = self.add_question()
@@ -70,7 +107,7 @@ class QuizSystemTests(unittest.TestCase):
         self.assertEqual(self.post('/questions/create', {**self.question, 'difficulty': 'Impossible'}).status_code, 400)
         self.assertEqual(self.post('/questions/create', {**self.question, 'correct_answer': 'Z'}).status_code, 400)
         self.assertEqual(self.client.post('/questions/create', data=self.question).status_code, 400)
-        self.assertEqual(self.client.post('/questions/create', data={'csrf_token': 'é'}).status_code, 400)
+        self.assertEqual(self.client.post('/questions/create', data={'csrf_token': 'Ã©'}).status_code, 400)
         self.assertEqual(self.post('/quiz/start', {'user_name': ' '}).status_code, 400)
         self.assertEqual(self.post('/quiz/start', {'user_name': 'x' * 81}).status_code, 400)
         for path in ['/questions/999', '/questions/999/edit', '/questions/999/delete',

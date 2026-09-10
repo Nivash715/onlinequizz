@@ -5,3 +5,8 @@ __pycache__/
 database/*.db
 database/*.db-*
 .env
+
+.env.*
+!.env.example
+.vercel/
+node_modules/

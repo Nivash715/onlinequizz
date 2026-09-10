@@ -33,7 +33,7 @@ The Blueprint generates `SECRET_KEY` automatically. For manual setup, generate
 one with `python -c "import secrets; print(secrets.token_hex(32))"` and save it
 in Render's environment settings. Keep it unchanged across redeploys.
 
-After deployment, open `https://YOUR-SERVICE.onrender.com/healthz` and confirm
+After deployment, open `https://onlinequizz-2.onrender.com/healthz` and confirm
 it returns `{"status":"ok"}`. Copy the HTTPS origin for Vercel.
 
 If you already created a paid service from the old configuration, changing the
@@ -49,13 +49,14 @@ Save any needed data before deleting an existing service or disk.
    command; no npm dependencies are required.
 4. Leave the Output Directory override disabled. Vercel detects the generated
    Build Output API directory `.vercel/output`.
-5. Set `BACKEND_URL=https://YOUR-SERVICE.onrender.com` in Production, then deploy.
-   Use the actual Render URL, with no path, query string, or credentials.
+5. Deploy. The build defaults to `https://onlinequizz-2.onrender.com`.
+   `BACKEND_URL` is optional; if it already exists in Vercel settings, update it
+   to this URL or remove it so the default applies.
 6. Open the Vercel URL, add a question, and complete a quiz to verify the flow.
 
 Redeploy Vercel when changing `BACKEND_URL`. Do not put Render's secret key or
-database settings in Vercel. Preview deployments need their own `BACKEND_URL`
-setting; if they point at production, they share and can change its data.
+database settings in Vercel. Preview deployments use the same default backend unless `BACKEND_URL` is
+overridden; they share and can change its data.
 
 ## Free hosting limitations
 
@@ -86,7 +87,7 @@ Remove an explicit `HOST=127.0.0.1` environment override if using direct Python.
 
 ```powershell
 python -m unittest discover -s tests -v
-$env:BACKEND_URL = 'https://YOUR-SERVICE.onrender.com'
+$env:BACKEND_URL = 'https://onlinequizz-2.onrender.com'
 node frontend/build.mjs
 ```
 
@@ -97,7 +98,8 @@ production session cookies use Secure, HttpOnly, and SameSite=Lax.
 
 - Slow first request or proxy timeout: open Render's `/healthz`, allow it to
   wake, then reload Vercel. Check Render logs if the error continues.
-- Missing `BACKEND_URL`: set it for the matching Vercel environment and redeploy.
+- Wrong backend: update or remove an existing Vercel `BACKEND_URL` override,
+  then redeploy. The default is `https://onlinequizz-2.onrender.com`.
 - Missing CSS: verify the Vercel root directory and build command.
 - Expired forms: reload; keep `SECRET_KEY` stable and restart a quiz if its
   temporary database disappeared.

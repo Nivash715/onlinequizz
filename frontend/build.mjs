@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const value = process.env.BACKEND_URL;
+const value = process.env.BACKEND_URL ?? 'https://onlinequizz-2.onrender.com';
 if (!value) throw new Error('Set BACKEND_URL to your Render HTTPS origin before building.');
 const backend = new URL(value);
 if (backend.protocol !== 'https:' || backend.username || backend.password ||

@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }}{% endblock %}
+{% block content %}<section class="panel centered-card"><span class="eyebrow">LET'S GET YOU BACK ON TRACK</span><h1>{{ code }}</h1><p>{{ message }}</p><a class="button" href="{{ url_for('quiz.index') }}">Back to Home →</a></section>{% endblock %}

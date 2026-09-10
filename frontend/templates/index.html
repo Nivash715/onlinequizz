@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">YOUR LEARNING, AT A GLANCE</p><h1>Online Quiz System</h1><p>Create a little curiosity. Build a little confidence.</p></div><span class="outline-tag">LEARN. PRACTICE. GROW.</span></div>
+<section class="hero">
+  <div class="hero-content"><span class="hero-kicker"><span class="status-dot"></span> Make room for your next discovery</span><h2>Big ideas start with<br>one good question.</h2><p>Put your knowledge to the test, explore what you know,<br class="desktop-break"> and learn something new along the way.</p><a class="button button-lime" href="{{ url_for('quiz.start') }}">Start Quiz <span>↗</span></a><span class="hero-note">At your pace. No time limit.</span></div>
+  <div class="hero-art" aria-hidden="true"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><span class="spark spark-one">✦</span><span class="spark spark-two">✦</span><div class="art-card card-back">A little more<br>curious every day.</div><div class="art-card card-front"><span class="art-label">THE NEXT CHAPTER</span><strong>?</strong><span class="art-bottom">Starts with you <span>↗</span></span></div><span class="art-pill">✓ &nbsp; Keep growing</span></div>
+</section>
+<section class="stats-grid" aria-label="Workspace statistics">
+  <article class="stat-card"><span class="stat-icon green">▤</span><div><p>Questions in your bank</p><strong>{{ question_count }}</strong><span>Ready to challenge you</span></div></article>
+  <article class="stat-card"><span class="stat-icon peach">✦</span><div><p>Quizzes completed</p><strong>{{ stats.total }}</strong><span>Every attempt is progress</span></div></article>
+  <article class="stat-card"><span class="stat-icon lavender">↗</span><div><p>Average score</p><strong>{{ '%g'|format(stats.average) }}<small>%</small></strong><span>{{ 'Across all completed quizzes' if stats.total else 'Your first score starts here' }}</span></div></article>
+</section>
+<div class="dashboard-grid">
+  <section><div class="section-heading"><h2>Your next step</h2><span>Small steps, steady progress</span></div><div class="action-grid">
+    <a class="action-card" href="{{ url_for('quiz.start') }}"><span class="action-top"><span class="tile-icon green">↗</span><span class="round-arrow">↗</span></span><h3>Test your knowledge</h3><p>A fresh opportunity to see what you know. Take on every question in the bank.</p><span class="text-link">Start Quiz <span>→</span></span></a>
+    <a class="action-card" href="{{ url_for('questions.list_questions') }}"><span class="action-top"><span class="tile-icon peach">▤</span><span class="round-arrow">↗</span></span><h3>Build your question bank</h3><p>Add new questions, refine the details, and make every quiz a little better.</p><span class="text-link">Manage Questions <span>→</span></span></a>
+  </div></section>
+  <aside class="tip-card"><span class="eyebrow">A MOMENT OF PERSPECTIVE</span><span class="tip-star" aria-hidden="true">✳</span><h3>Progress is practice,<br>not perfection.</h3><p>Every question is a chance to learn. Take your time, stay curious, and give it a go.</p><span class="tip-bottom">{{ category_count }} {{ 'category' if category_count == 1 else 'categories' }} to explore <span>↗</span></span></aside>
+</div>
+<section class="recent-section"><div class="section-heading"><h2>Recent activity</h2><span>Your latest learning moments</span></div>
+{% if results %}<div class="table-wrap"><table><thead><tr><th>Participant</th><th>Score</th><th>Percentage</th><th>Completed (UTC)</th><th>Result</th></tr></thead><tbody>{% for result in results %}<tr><td><strong>{{ result.user_name }}</strong></td><td>{{ result.score }} / {{ result.total_questions }}</td><td><span class="badge easy">{{ '%g'|format(result.percentage) }}%</span></td><td>{{ result.created_at }}</td><td><a class="text-link" href="{{ url_for('quiz.result', result_id=result.id) }}">View result ↗</a></td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty-inline"><span class="tile-icon lavender">◷</span><div><h3>Your story starts here</h3><p>Complete your first quiz and your result will appear here.</p></div><a class="text-link" href="{{ url_for('quiz.start') }}">Let's begin →</a></div>{% endif %}</section>
+{% endblock %}

@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}Delete question{% endblock %}
+{% block content %}<section class="panel centered-card"><span class="empty-symbol warning-symbol">!</span><p class="eyebrow">QUESTION #{{ question.id }}</p><h1>Delete this question?</h1><p>This removes it from the question bank. Saved results and quizzes already in progress will be kept.</p><blockquote>{{ question.question }}</blockquote><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="button-row"><a class="button button-secondary" href="{{ url_for('questions.view', question_id=question.id) }}">Keep Question</a><button class="button button-danger">Delete Question</button></div></form></section>{% endblock %}
